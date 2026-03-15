@@ -53,7 +53,10 @@ export default function Index() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <BarChart3 className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-lg tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <span
+              className="font-semibold text-lg tracking-tight"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
               UX Evaluator
             </span>
           </div>
@@ -67,14 +70,17 @@ export default function Index() {
             <Zap className="w-3.5 h-3.5" />
             Powered by AI & Nielsen's 10 Heuristics
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6 leading-[1.1]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <h1
+            className="text-5xl md:text-6xl font-bold tracking-tight mb-6 leading-[1.1]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
             AI UX Heuristic
             <br />
             <span className="text-primary">Evaluator</span>
           </h1>
           <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto leading-relaxed">
-            Analyze any website's usability in seconds. Get actionable insights based on
-            Nielsen Norman Group's proven heuristic framework.
+            Analyze any website's usability in seconds. Get actionable insights based on Nielsen Norman Group's proven
+            heuristic framework.
           </p>
 
           <form onSubmit={handleAnalyze} className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
@@ -116,7 +122,10 @@ export default function Index() {
           {STEPS.map((step) => (
             <Card key={step.num} className="border-border/50 bg-card/50 backdrop-blur-sm">
               <CardContent className="p-6">
-                <span className="text-4xl font-bold text-primary/20" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <span
+                  className="text-4xl font-bold text-primary/20"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                >
                   {step.num}
                 </span>
                 <h3 className="text-lg font-semibold mt-2 mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -136,7 +145,10 @@ export default function Index() {
         </h2>
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {HEURISTICS.map((h) => (
-            <Card key={h.title} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-shadow">
+            <Card
+              key={h.title}
+              className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-shadow"
+            >
               <CardContent className="p-6">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <h.icon className="w-5 h-5 text-primary" />
@@ -157,7 +169,7 @@ export default function Index() {
       {/* Footer */}
       <footer className="border-t border-border/50 py-8">
         <p className="text-center text-sm text-muted-foreground">
-          Built with AI · Based on Jakob Nielsen's 10 Usability Heuristics
+          © 2026| Built by Ananya Chandraker based on Jakob Nielsen's 10 Usability Heuristics
         </p>
       </footer>
     </div>
