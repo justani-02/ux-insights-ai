@@ -6,19 +6,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const HEURISTICS = [
-  "Visibility of system status",
-  "Match between system and the real world",
-  "User control and freedom",
-  "Consistency and standards",
-  "Error prevention",
-  "Recognition rather than recall",
-  "Flexibility and efficiency of use",
-  "Aesthetic and minimalist design",
-  "Help users recognize and recover from errors",
-  "Help and documentation",
-];
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -48,11 +35,12 @@ Given website content, you must analyze it and return structured JSON data via t
 
 For each of the 10 heuristics, identify specific issues found on the website. Be specific and actionable. Rate severity as "Low", "Medium", or "High".
 
+For each heuristic result, also provide sub-scores (0-100) for: Navigation Clarity, Information Hierarchy, Feedback Visibility, Error Prevention, Interaction Efficiency — representing how that heuristic impacts each UX dimension.
+
 Also generate:
 - An overall UX score from 0-100
-- Sub-scores (0-100) for: navigation_clarity, information_hierarchy, feedback_visibility, error_prevention, interaction_efficiency
+- A page title
 - A brief executive summary (2-3 sentences)
-- 3-5 actionable recommendation cards with title, problem, impact, and solution
 
 Be thorough but realistic. Not every heuristic will have violations.`;
 
@@ -87,46 +75,34 @@ ${markdown.substring(0, 12000)}`;
                   page_title: { type: "string", description: "The title/name of the website page" },
                   summary: { type: "string", description: "Executive summary of the UX evaluation (2-3 sentences)" },
                   overall_score: { type: "integer", minimum: 0, maximum: 100 },
-                  navigation_clarity_score: { type: "integer", minimum: 0, maximum: 100 },
-                  information_hierarchy_score: { type: "integer", minimum: 0, maximum: 100 },
-                  feedback_visibility_score: { type: "integer", minimum: 0, maximum: 100 },
-                  error_prevention_score: { type: "integer", minimum: 0, maximum: 100 },
-                  interaction_efficiency_score: { type: "integer", minimum: 0, maximum: 100 },
-                  heuristic_violations: {
+                  heuristic_results: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        heuristic: { type: "string" },
-                        issue: { type: "string" },
+                        heuristic_name: { type: "string", description: "Name of the Nielsen heuristic" },
+                        issue: { type: "string", description: "Specific issue found" },
                         severity: { type: "string", enum: ["Low", "Medium", "High"] },
-                        recommendation: { type: "string" },
+                        recommendation: { type: "string", description: "Actionable recommendation to fix the issue" },
+                        sub_scores: {
+                          type: "object",
+                          properties: {
+                            "Navigation Clarity": { type: "integer", minimum: 0, maximum: 100 },
+                            "Information Hierarchy": { type: "integer", minimum: 0, maximum: 100 },
+                            "Feedback Visibility": { type: "integer", minimum: 0, maximum: 100 },
+                            "Error Prevention": { type: "integer", minimum: 0, maximum: 100 },
+                            "Interaction Efficiency": { type: "integer", minimum: 0, maximum: 100 },
+                          },
+                          required: ["Navigation Clarity", "Information Hierarchy", "Feedback Visibility", "Error Prevention", "Interaction Efficiency"],
+                          additionalProperties: false,
+                        },
                       },
-                      required: ["heuristic", "issue", "severity", "recommendation"],
-                      additionalProperties: false,
-                    },
-                  },
-                  recommendations: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        title: { type: "string" },
-                        problem: { type: "string" },
-                        impact: { type: "string" },
-                        solution: { type: "string" },
-                      },
-                      required: ["title", "problem", "impact", "solution"],
+                      required: ["heuristic_name", "issue", "severity", "recommendation", "sub_scores"],
                       additionalProperties: false,
                     },
                   },
                 },
-                required: [
-                  "page_title", "summary", "overall_score",
-                  "navigation_clarity_score", "information_hierarchy_score",
-                  "feedback_visibility_score", "error_prevention_score",
-                  "interaction_efficiency_score", "heuristic_violations", "recommendations",
-                ],
+                required: ["page_title", "summary", "overall_score", "heuristic_results"],
                 additionalProperties: false,
               },
             },

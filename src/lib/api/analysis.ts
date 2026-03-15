@@ -1,17 +1,17 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type HeuristicViolation = {
-  heuristic: string;
+export type HeuristicResult = {
+  heuristic_name: string;
   issue: string;
   severity: "Low" | "Medium" | "High";
   recommendation: string;
-};
-
-export type Recommendation = {
-  title: string;
-  problem: string;
-  impact: string;
-  solution: string;
+  sub_scores: {
+    "Navigation Clarity": number;
+    "Information Hierarchy": number;
+    "Feedback Visibility": number;
+    "Error Prevention": number;
+    "Interaction Efficiency": number;
+  };
 };
 
 export type AnalysisResult = {
@@ -26,14 +26,18 @@ export type AnalysisResult = {
   feedback_visibility_score: number | null;
   error_prevention_score: number | null;
   interaction_efficiency_score: number | null;
-  heuristic_violations: HeuristicViolation[];
-  recommendations: Recommendation[];
+  heuristic_results: HeuristicResult[];
   status: string;
   created_at: string;
 };
 
+function avgSubScore(results: HeuristicResult[], key: keyof HeuristicResult["sub_scores"]): number {
+  if (!results.length) return 0;
+  const sum = results.reduce((acc, r) => acc + (r.sub_scores?.[key] || 0), 0);
+  return Math.round(sum / results.length);
+}
+
 export async function startAnalysis(url: string): Promise<AnalysisResult> {
-  // 1. Create pending record
   const { data: record, error: insertError } = await supabase
     .from("analyses")
     .insert({ url, status: "scraping" })
@@ -43,7 +47,6 @@ export async function startAnalysis(url: string): Promise<AnalysisResult> {
   if (insertError || !record) throw new Error(insertError?.message || "Failed to create analysis");
 
   try {
-    // 2. Scrape the website
     const { data: scrapeData, error: scrapeError } = await supabase.functions.invoke(
       "firecrawl-scrape",
       { body: { url } }
@@ -56,13 +59,11 @@ export async function startAnalysis(url: string): Promise<AnalysisResult> {
     const screenshotUrl = scrapeData.data?.screenshot || scrapeData.screenshot || null;
     const pageTitle = scrapeData.data?.metadata?.title || scrapeData.metadata?.title || null;
 
-    // Update status
     await supabase
       .from("analyses")
       .update({ status: "analyzing", screenshot_url: screenshotUrl, page_title: pageTitle })
       .eq("id", record.id);
 
-    // 3. Run AI analysis
     const { data: analysisData, error: analysisError } = await supabase.functions.invoke(
       "ux-analyze",
       { body: { url, markdown, screenshot_url: screenshotUrl } }
@@ -72,8 +73,8 @@ export async function startAnalysis(url: string): Promise<AnalysisResult> {
     if (!analysisData?.success) throw new Error(analysisData?.error || "Analysis failed");
 
     const result = analysisData.data;
+    const heuristicResults: HeuristicResult[] = result.heuristic_results || [];
 
-    // 4. Save results
     const { data: updated, error: updateError } = await supabase
       .from("analyses")
       .update({
@@ -82,13 +83,13 @@ export async function startAnalysis(url: string): Promise<AnalysisResult> {
         summary: result.summary,
         screenshot_url: result.screenshot_url || screenshotUrl,
         overall_score: result.overall_score,
-        navigation_clarity_score: result.navigation_clarity_score,
-        information_hierarchy_score: result.information_hierarchy_score,
-        feedback_visibility_score: result.feedback_visibility_score,
-        error_prevention_score: result.error_prevention_score,
-        interaction_efficiency_score: result.interaction_efficiency_score,
-        heuristic_violations: result.heuristic_violations,
-        recommendations: result.recommendations,
+        navigation_clarity_score: avgSubScore(heuristicResults, "Navigation Clarity"),
+        information_hierarchy_score: avgSubScore(heuristicResults, "Information Hierarchy"),
+        feedback_visibility_score: avgSubScore(heuristicResults, "Feedback Visibility"),
+        error_prevention_score: avgSubScore(heuristicResults, "Error Prevention"),
+        interaction_efficiency_score: avgSubScore(heuristicResults, "Interaction Efficiency"),
+        heuristic_violations: heuristicResults as any,
+        recommendations: [] as any,
       })
       .eq("id", record.id)
       .select()
@@ -98,8 +99,7 @@ export async function startAnalysis(url: string): Promise<AnalysisResult> {
 
     return {
       ...updated,
-      heuristic_violations: (updated.heuristic_violations as unknown as HeuristicViolation[]) || [],
-      recommendations: (updated.recommendations as unknown as Recommendation[]) || [],
+      heuristic_results: (updated.heuristic_violations as unknown as HeuristicResult[]) || [],
     };
   } catch (err) {
     await supabase.from("analyses").update({ status: "failed" }).eq("id", record.id);
@@ -112,7 +112,6 @@ export async function getAnalysis(id: string): Promise<AnalysisResult | null> {
   if (error || !data) return null;
   return {
     ...data,
-    heuristic_violations: (data.heuristic_violations as unknown as HeuristicViolation[]) || [],
-    recommendations: (data.recommendations as unknown as Recommendation[]) || [],
+    heuristic_results: (data.heuristic_violations as unknown as HeuristicResult[]) || [],
   };
 }
