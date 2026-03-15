@@ -50,9 +50,9 @@ export default function Dashboard() {
     );
   }
 
-  const highCount = analysis.heuristic_violations.filter((v) => v.severity === "High").length;
-  const medCount = analysis.heuristic_violations.filter((v) => v.severity === "Medium").length;
-  const lowCount = analysis.heuristic_violations.filter((v) => v.severity === "Low").length;
+  const highCount = analysis.heuristic_results.filter((v) => v.severity === "High").length;
+  const medCount = analysis.heuristic_results.filter((v) => v.severity === "Medium").length;
+  const lowCount = analysis.heuristic_results.filter((v) => v.severity === "Low").length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -151,13 +151,13 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Heuristic Violations Table */}
+        {/* Heuristic Results Table */}
         <Card className="border-border/50 mb-8">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              <AlertTriangle className="w-4 h-4 text-primary" /> Heuristic Violations
+              <AlertTriangle className="w-4 h-4 text-primary" /> Heuristic Results
             </CardTitle>
-            <CardDescription>{analysis.heuristic_violations.length} issues found</CardDescription>
+            <CardDescription>{analysis.heuristic_results.length} issues found</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
@@ -170,9 +170,9 @@ export default function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {analysis.heuristic_violations.map((v, i) => (
+                {analysis.heuristic_results.map((v, i) => (
                   <TableRow key={i}>
-                    <TableCell className="font-medium text-sm">{v.heuristic}</TableCell>
+                    <TableCell className="font-medium text-sm">{v.heuristic_name}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{v.issue}</TableCell>
                     <TableCell>
                       <SeverityBadge severity={v.severity} />
@@ -184,31 +184,6 @@ export default function Dashboard() {
             </Table>
           </CardContent>
         </Card>
-
-        {/* Recommendation Cards */}
-        {analysis.recommendations.length > 0 && (
-          <div>
-            <h2 className="text-lg font-bold mb-4 flex items-center gap-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              <Lightbulb className="w-4 h-4 text-primary" /> Recommendations
-            </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {analysis.recommendations.map((rec, i) => (
-                <Card key={i} className="border-border/50">
-                  <CardContent className="p-5">
-                    <h3 className="font-semibold mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      {rec.title}
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      <p><span className="font-medium text-foreground">Problem:</span>{" "}<span className="text-muted-foreground">{rec.problem}</span></p>
-                      <p><span className="font-medium text-foreground">Impact:</span>{" "}<span className="text-muted-foreground">{rec.impact}</span></p>
-                      <p><span className="font-medium text-primary">Solution:</span>{" "}<span className="text-muted-foreground">{rec.solution}</span></p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

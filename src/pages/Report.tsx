@@ -133,53 +133,37 @@ export default function Report() {
           </section>
         )}
 
-        {/* Heuristic Violations */}
+        {/* Heuristic Results */}
         <section className="mb-8">
           <h2 className="text-xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            Heuristic Violations
+            Heuristic Results
           </h2>
           <div className="space-y-3">
-            {analysis.heuristic_violations.map((v, i) => (
+            {analysis.heuristic_results.map((v, i) => (
               <Card key={i} className="border-border/50">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="font-semibold text-sm">{v.heuristic}</h3>
+                    <h3 className="font-semibold text-sm">{v.heuristic_name}</h3>
                     <SeverityBadge severity={v.severity} />
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
                     <span className="font-medium text-foreground">Issue:</span> {v.issue}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground mb-3">
                     <span className="font-medium text-primary">Fix:</span> {v.recommendation}
                   </p>
+                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                    <span>Nav: <strong className="text-foreground">{v.sub_scores?.["Navigation Clarity"] ?? "–"}</strong></span>
+                    <span>Info: <strong className="text-foreground">{v.sub_scores?.["Information Hierarchy"] ?? "–"}</strong></span>
+                    <span>Feedback: <strong className="text-foreground">{v.sub_scores?.["Feedback Visibility"] ?? "–"}</strong></span>
+                    <span>Errors: <strong className="text-foreground">{v.sub_scores?.["Error Prevention"] ?? "–"}</strong></span>
+                    <span>Efficiency: <strong className="text-foreground">{v.sub_scores?.["Interaction Efficiency"] ?? "–"}</strong></span>
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         </section>
-
-        {/* Design Recommendations */}
-        {analysis.recommendations.length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-xl font-bold mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Design Recommendations
-            </h2>
-            {analysis.recommendations.map((rec, i) => (
-              <Card key={i} className="border-border/50 mb-3">
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {i + 1}. {rec.title}
-                  </h3>
-                  <div className="space-y-1 text-sm">
-                    <p><span className="font-medium">Problem:</span> <span className="text-muted-foreground">{rec.problem}</span></p>
-                    <p><span className="font-medium">Impact:</span> <span className="text-muted-foreground">{rec.impact}</span></p>
-                    <p><span className="font-medium text-primary">Solution:</span> <span className="text-muted-foreground">{rec.solution}</span></p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </section>
-        )}
 
         <Separator className="mb-6" />
         <p className="text-center text-xs text-muted-foreground pb-8">
