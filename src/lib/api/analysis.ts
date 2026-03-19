@@ -80,6 +80,7 @@ export async function startAnalysis(
   if (insertError || !record) throw new Error(insertError?.message || "Failed to create analysis");
 
   try {
+    onProgress?.("scraping");
     const { data: scrapeData, error: scrapeError } = await supabase.functions.invoke(
       "firecrawl-scrape",
       { body: { url } }
