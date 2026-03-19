@@ -3,11 +3,14 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { getAnalysis, type AnalysisResult } from "@/lib/api/analysis";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SeverityBadge } from "@/components/SeverityBadge";
+import { ImpactEffortMatrix } from "@/components/ImpactEffortMatrix";
+import { AppNav } from "@/components/AppNav";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart3, ArrowLeft, FileText, ExternalLink, AlertTriangle, Lightbulb } from "lucide-react";
+import { ArrowLeft, FileText, ExternalLink, AlertTriangle, Lightbulb, ListTodo } from "lucide-react";
 
 export default function Dashboard() {
   const { id } = useParams<{ id: string }>();
@@ -26,7 +29,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Nav />
+        <AppNav />
         <div className="container mx-auto px-6 py-12 space-y-6">
           <Skeleton className="h-8 w-64" />
           <div className="grid md:grid-cols-6 gap-6">
@@ -56,7 +59,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Nav />
+      <AppNav />
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -76,11 +79,18 @@ export default function Dashboard() {
               {analysis.url} <ExternalLink className="w-3 h-3" />
             </a>
           </div>
-          <Button asChild>
-            <Link to={`/report/${analysis.id}`}>
-              <FileText className="w-4 h-4 mr-2" /> View Full Report
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/tasks">
+                <ListTodo className="w-4 h-4 mr-2" /> View Tasks
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to={`/report/${analysis.id}`}>
+                <FileText className="w-4 h-4 mr-2" /> Full Report
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Score + Sub-scores */}
@@ -111,7 +121,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Summary + screenshot */}
+        {/* Summary + Screenshot */}
         {(analysis.summary || analysis.screenshot_url) && (
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {analysis.summary && (
@@ -124,9 +134,9 @@ export default function Dashboard() {
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">{analysis.summary}</p>
                   <div className="flex gap-4 mt-4 text-sm">
-                    <span className="text-[hsl(var(--severity-high))] font-medium">{highCount} High</span>
-                    <span className="text-[hsl(var(--severity-medium))] font-medium">{medCount} Medium</span>
-                    <span className="text-[hsl(var(--severity-low))] font-medium">{lowCount} Low</span>
+                    <span className="text-severity-high font-medium">{highCount} High</span>
+                    <span className="text-severity-medium font-medium">{medCount} Medium</span>
+                    <span className="text-severity-low font-medium">{lowCount} Low</span>
                   </div>
                 </CardContent>
               </Card>
@@ -151,6 +161,11 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Impact vs Effort Matrix */}
+        <div className="mb-8">
+          <ImpactEffortMatrix results={analysis.heuristic_results} />
+        </div>
+
         {/* Heuristic Results Table */}
         <Card className="border-border/50 mb-8">
           <CardHeader>
@@ -160,48 +175,43 @@ export default function Dashboard() {
             <CardDescription>{analysis.heuristic_results.length} issues found</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[200px]">Heuristic</TableHead>
-                  <TableHead>Issue</TableHead>
-                  <TableHead className="w-[100px]">Severity</TableHead>
-                  <TableHead>Recommendation</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {analysis.heuristic_results.map((v, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="font-medium text-sm">{v.heuristic_name}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{v.issue}</TableCell>
-                    <TableCell>
-                      <SeverityBadge severity={v.severity} />
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{v.recommendation}</TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[180px]">Heuristic</TableHead>
+                    <TableHead>Issue</TableHead>
+                    <TableHead className="w-[80px]">Severity</TableHead>
+                    <TableHead className="w-[80px]">Impact</TableHead>
+                    <TableHead className="w-[80px]">Effort</TableHead>
+                    <TableHead className="w-[120px]">KPI</TableHead>
+                    <TableHead>Recommendation</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {analysis.heuristic_results.map((v, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="font-medium text-sm">{v.heuristic_name}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{v.issue}</TableCell>
+                      <TableCell>
+                        <SeverityBadge severity={v.severity} />
+                      </TableCell>
+                      <TableCell>
+                        <SeverityBadge severity={v.impact || "Medium"} />
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">{v.effort || "Medium"}</Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{v.kpi_impact || "–"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{v.recommendation}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
     </div>
-  );
-}
-
-function Nav() {
-  return (
-    <nav className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
-      <div className="container mx-auto px-6 h-16 flex items-center">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <BarChart3 className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <span className="font-semibold text-lg tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            UX Evaluator
-          </span>
-        </Link>
-      </div>
-    </nav>
   );
 }
