@@ -58,6 +58,12 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <AppNav />
 
+      {loading ? (
+        <section className="container mx-auto px-6 pt-24 pb-20">
+          <AnalysisProgress stage={stage} />
+        </section>
+      ) : (
+      <>
       {/* Hero */}
       <section className="container mx-auto px-6 pt-24 pb-20">
         <div className="max-w-3xl mx-auto text-center">
