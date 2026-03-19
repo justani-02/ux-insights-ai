@@ -67,7 +67,10 @@ function calcPriority(impact: string, effort: string): "High" | "Medium" | "Low"
   return "Medium";
 }
 
-export async function startAnalysis(url: string): Promise<AnalysisResult> {
+export async function startAnalysis(
+  url: string,
+  onProgress?: (stage: "scraping" | "analyzing" | "generating") => void
+): Promise<AnalysisResult> {
   const { data: record, error: insertError } = await supabase
     .from("analyses")
     .insert({ url, status: "scraping" })
