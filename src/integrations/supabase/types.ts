@@ -71,6 +71,62 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          analysis_id: string
+          created_at: string
+          effort: string
+          id: string
+          impact: string
+          kpi_impact: string | null
+          linked_heuristic_name: string
+          priority: string
+          risk_level: string
+          status: string
+          task_description: string
+          task_title: string
+          updated_at: string
+        }
+        Insert: {
+          analysis_id: string
+          created_at?: string
+          effort?: string
+          id?: string
+          impact?: string
+          kpi_impact?: string | null
+          linked_heuristic_name?: string
+          priority?: string
+          risk_level?: string
+          status?: string
+          task_description?: string
+          task_title: string
+          updated_at?: string
+        }
+        Update: {
+          analysis_id?: string
+          created_at?: string
+          effort?: string
+          id?: string
+          impact?: string
+          kpi_impact?: string | null
+          linked_heuristic_name?: string
+          priority?: string
+          risk_level?: string
+          status?: string
+          task_description?: string
+          task_title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
