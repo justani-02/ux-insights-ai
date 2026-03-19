@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { startAnalysis } from "@/lib/api/analysis";
 import { useToast } from "@/hooks/use-toast";
 import { AppNav } from "@/components/AppNav";
+import { AnalysisProgress, type AnalysisStage } from "@/components/AnalysisProgress";
 import { Search, FileText, Zap, Shield, Eye, ArrowRight, Loader2, Target, TrendingUp } from "lucide-react";
 
 const HEURISTICS = [
