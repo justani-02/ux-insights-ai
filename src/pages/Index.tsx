@@ -39,8 +39,9 @@ export default function Index() {
     if (!url.trim()) return;
 
     setLoading(true);
+    setStage("scraping");
     try {
-      const result = await startAnalysis(url.trim());
+      const result = await startAnalysis(url.trim(), (s) => setStage(s));
       navigate(`/dashboard/${result.id}`);
     } catch (err: any) {
       toast({
