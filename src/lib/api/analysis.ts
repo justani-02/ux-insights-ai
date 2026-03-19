@@ -67,7 +67,10 @@ function calcPriority(impact: string, effort: string): "High" | "Medium" | "Low"
   return "Medium";
 }
 
-export async function startAnalysis(url: string): Promise<AnalysisResult> {
+export async function startAnalysis(
+  url: string,
+  onProgress?: (stage: "scraping" | "analyzing" | "generating") => void
+): Promise<AnalysisResult> {
   const { data: record, error: insertError } = await supabase
     .from("analyses")
     .insert({ url, status: "scraping" })
@@ -77,6 +80,7 @@ export async function startAnalysis(url: string): Promise<AnalysisResult> {
   if (insertError || !record) throw new Error(insertError?.message || "Failed to create analysis");
 
   try {
+    onProgress?.("scraping");
     const { data: scrapeData, error: scrapeError } = await supabase.functions.invoke(
       "firecrawl-scrape",
       { body: { url } }
@@ -94,6 +98,7 @@ export async function startAnalysis(url: string): Promise<AnalysisResult> {
       .update({ status: "analyzing", screenshot_url: screenshotUrl, page_title: pageTitle })
       .eq("id", record.id);
 
+    onProgress?.("analyzing");
     const { data: analysisData, error: analysisError } = await supabase.functions.invoke(
       "ux-analyze",
       { body: { url, markdown, screenshot_url: screenshotUrl } }
@@ -105,6 +110,7 @@ export async function startAnalysis(url: string): Promise<AnalysisResult> {
     const result = analysisData.data;
     const heuristicResults: HeuristicResult[] = result.heuristic_results || [];
 
+    onProgress?.("generating");
     const { data: updated, error: updateError } = await supabase
       .from("analyses")
       .update({

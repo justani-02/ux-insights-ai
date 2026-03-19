@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { startAnalysis } from "@/lib/api/analysis";
 import { useToast } from "@/hooks/use-toast";
 import { AppNav } from "@/components/AppNav";
+import { AnalysisProgress, type AnalysisStage } from "@/components/AnalysisProgress";
 import { Search, FileText, Zap, Shield, Eye, ArrowRight, Loader2, Target, TrendingUp } from "lucide-react";
 
 const HEURISTICS = [
@@ -29,6 +30,7 @@ const STEPS = [
 export default function Index() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [stage, setStage] = useState<AnalysisStage>("scraping");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -37,8 +39,9 @@ export default function Index() {
     if (!url.trim()) return;
 
     setLoading(true);
+    setStage("scraping");
     try {
-      const result = await startAnalysis(url.trim());
+      const result = await startAnalysis(url.trim(), (s) => setStage(s));
       navigate(`/dashboard/${result.id}`);
     } catch (err: any) {
       toast({
@@ -55,6 +58,12 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <AppNav />
 
+      {loading ? (
+        <section className="container mx-auto px-6 pt-24 pb-20">
+          <AnalysisProgress stage={stage} />
+        </section>
+      ) : (
+      <>
       {/* Hero */}
       <section className="container mx-auto px-6 pt-24 pb-20">
         <div className="max-w-3xl mx-auto text-center">
@@ -175,6 +184,8 @@ export default function Index() {
           © 2026 | Built by Ananya Chandraker based on Jakob Nielsen's 10 Usability Heuristics
         </p>
       </footer>
+      </>
+      )}
     </div>
   );
 }
